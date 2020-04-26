@@ -84,7 +84,6 @@ Winner two_players_game(const Info info)
             exit(EXIT_SUCCESS);
         }
         if (!response(attack, map, p1, PLAYER1)) {
-            display(map);
             continue;
         }
         if (map[PLAYER1].remaining_boats == 0)
