@@ -41,7 +41,7 @@ Validity check_valid(const Point attack, const Camp sea[][WIDTH])
 
 void create_map(Boat *p1[], Boat *p2[], Map map[], const Info info)
 {
-    const Types pattern[MAX_BOATS] = {DESTROYER, SUBMARINE, CRUISER,
+    const Types pattern[5] = {DESTROYER, SUBMARINE, CRUISER,
                                          BATTLESHIP, CARRIER};
     const int pattern_size[5] = {2, 3, 3, 4, 5};
 
