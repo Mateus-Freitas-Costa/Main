@@ -115,7 +115,7 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
         bot->state.right_axis = true;
     } else {
         bot->state.right_axis = false;
-        if (bot->buff.count < bot->level && bot->buff.count <= BUFF_SIZE)
+        if (bot->buff.count < bot->level / 2 && bot->buff.count <= BUFF_SIZE)
             queue(&bot->buff, attacked, attack);
         *get_blocked_direction(bot) = true;
         bot->spot.current_cor = bot->spot.ghost_cor;
