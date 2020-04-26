@@ -110,8 +110,7 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
         if (bot->state.right_axis && bot->level >= 2)
             bot->state.arrow = reverse_arrow(bot->state.arrow);
         bot->spot.current_cor = bot->spot.ghost_cor;
-    }
-    else if (comparision(bot, attacked)) {
+    } else if (comparision(bot, attacked)) {
         bot->state.right_axis = true;
     } else {
         bot->state.right_axis = false;
