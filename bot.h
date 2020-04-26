@@ -2,7 +2,6 @@
 #define BOT_H
 
 #define BUFF_SIZE (NUMBER_DIRECTIONS - 1)
-#define LEVEL_M    20
 #define MAX_TRIES  20
 
 #include "battle.h"
