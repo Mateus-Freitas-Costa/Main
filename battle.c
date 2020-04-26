@@ -42,7 +42,7 @@ Validity check_valid(const Point attack, const Camp sea[][WIDTH])
 void create_map(Boat *p1[], Boat *p2[], Map map[], const Info info)
 {
     const Types pattern[MAX_BOATS] = {DESTROYER, SUBMARINE, CRUISER,
-                                         BATTLESHIP, CARRIER, DESTROYER, SUBMARINE, BATTLESHIP};
+                                         BATTLESHIP, CARRIER};
     const int pattern_size[5] = {2, 3, 3, 4, 5};
 
     for (int i = 0; i < MAX_PLAYERS; ++i) {
@@ -60,7 +60,7 @@ void create_map(Boat *p1[], Boat *p2[], Map map[], const Info info)
         }
     }
     for (int i = 0; i < info.boats; ++i) {
-        Types type = pattern[i];
+        Types type = pattern[i % 5];
         int size = pattern_size[type];
         while ((p1[i] = create_boat(type, size, map[PLAYER1].sea)) == NULL)
             continue;
