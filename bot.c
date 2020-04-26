@@ -2,14 +2,15 @@
 
 #include "bot.h"
 
-static void   restart                 (AI *bot);
-static Previous   enqueue             (Buff *buff);
-static void   queue                   (Buff *buff, Boat *b, Point attack);
-static Point  continue_attack         (AI *bot, Map *map, Boat *p[]);
-static Point  new_attack              (AI *bot, Map *map, Boat *p[]);
-static Arrow  reverse_arrow           (const Arrow a);
-static bool  *get_blocked_direction   (AI *bot);
-static bool   all_blocked             (const AI *bot);
+static void       restart                 (AI *bot);
+static Previous   enqueue                 (Buff *buff);
+static void       queue                   (Buff *buff, Boat *b, Point attack);
+static Point      continue_attack         (AI *bot, Map *map, Boat *p[]);
+static Point      new_attack              (AI *bot, Map *map, Boat *p[]);
+static Arrow      reverse_arrow           (const Arrow a);
+static bool      *get_blocked_direction   (AI *bot);
+static bool       all_blocked             (const AI *bot);
+static bool       comparision             (AI *bot, Boat *attacked);
 
 
 
@@ -23,7 +24,7 @@ void create_bot(AI *bot, const unsigned int d)
 
 Point bot_time(AI *bot, Map *map, Boat *p[])
 {
-    if (bot->state.searching)
+    if (bot->state.searching || bot->level == 0)
         return new_attack(bot, map, p);
     else 
         return continue_attack(bot, map, p);
@@ -39,6 +40,7 @@ static Point new_attack(AI *bot, Map *map, Boat *p[])
         if (bot->spot.target == NULL) {
             ++bot->state.count_tries;
             if (bot->state.count_tries >= MAX_TRIES) {
+                bot->spot.current_cor = bot->spot.ghost_cor = attack;
                 bot->state.count_tries = 0;
                 return attack;
             }
@@ -105,20 +107,29 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
     Boat *attacked = get_boat(p, attack, map->info.boats);
     if (attacked == NULL) {
         *get_blocked_direction(bot) = true;
-        if (bot->state.right_axis)
+        if (bot->state.right_axis && bot->level >= 2)
             bot->state.arrow = reverse_arrow(bot->state.arrow);
         bot->spot.current_cor = bot->spot.ghost_cor;
     }
-    else if (attacked == bot->spot.target) {
+    else if (comparision(bot, attacked)) {
         bot->state.right_axis = true;
     } else {
         bot->state.right_axis = false;
-        if (bot->buff.count < bot->level)
+        if (bot->buff.count < bot->level && bot->buff.count <= BUFF_SIZE)
             queue(&bot->buff, attacked, attack);
         *get_blocked_direction(bot) = true;
         bot->spot.current_cor = bot->spot.ghost_cor;
     }
     return attack;
+}
+
+static bool comparision(AI *bot, Boat *attacked)
+{
+    if (bot->level >= 3) {
+        return attacked == bot->spot.target;
+    } else {
+        return attacked->type == bot->spot.target->type;
+    }
 }
 
 static bool *get_blocked_direction(AI *bot)
