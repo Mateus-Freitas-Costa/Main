@@ -12,7 +12,10 @@ static bool destroyed_boat   (Map *map, Boat *p, Point attack);
 static void display          (const Map map[]);
 static void display_HUD      (const Map map[], const int current_height);
 static bool check_quit       (const Point input);
-static bool response         (Point attack, Map map[], Boat *p[], const Player enemy);
+static bool 
+
+
+(Point attack, Map map[], Boat *p[], const Player enemy);
 static void bot_response     (Map map[], const Point attack, Boat *p[]);
 static void destroy_boats    (Boat *p1[], Boat *p2[], size_t boats);
 
@@ -36,7 +39,6 @@ Winner bot_game(const Info info)
             exit(EXIT_SUCCESS);
         }
         if (!response(attack, map, p2, OPPONENT)) {
-            display(map);
             continue;
         }
         if (map[OPPONENT].remaining_boats == 0)
@@ -72,7 +74,6 @@ Winner two_players_game(const Info info)
             exit(EXIT_SUCCESS);
         }
         if (!response(attack, map, p2, OPPONENT)) {
-            display(map);
             continue;
         }
         if (map[OPPONENT].remaining_boats == 0)
