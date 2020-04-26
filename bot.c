@@ -10,7 +10,7 @@ static Point      new_attack              (AI *bot, Map *map, Boat *p[]);
 static Arrow      reverse_arrow           (const Arrow a);
 static bool      *get_blocked_direction   (AI *bot);
 static bool       all_blocked             (const AI *bot);
-static bool       comparision             (AI *bot, Boat *attacked);
+static bool       are_the_same            (AI *bot, Boat *attacked);
 
 
 
@@ -110,7 +110,7 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
         if (bot->state.right_axis && bot->level >= 2)
             bot->state.arrow = reverse_arrow(bot->state.arrow);
         bot->spot.current_cor = bot->spot.ghost_cor;
-    } else if (comparision(bot, attacked)) {
+    } else if (are_the_same(bot, attacked)) {
         bot->state.right_axis = true;
     } else {
         bot->state.right_axis = false;
@@ -122,7 +122,7 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
     return attack;
 }
 
-static bool comparision(AI *bot, Boat *attacked)
+static bool are_the_same(AI *bot, Boat *attacked)
 {
     if (bot->level >= 3) {
         return attacked == bot->spot.target;
