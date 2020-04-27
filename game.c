@@ -63,7 +63,7 @@ Winner two_players_game(const Info info)
     display(map);
     Point attack;
     for (;;) {
-        do {
+        for (;;) {
             printf("Player one time, enter a coordinate (x-y): ");
             scanf("%d -%d", &attack.x, &attack.y);
             if (check_quit(attack)) {
@@ -71,11 +71,12 @@ Winner two_players_game(const Info info)
                 destroy_boats(p1, p2, info.boats);
                 exit(EXIT_SUCCESS);
             }
-        } while (!response(attack, map, p2, OPPONENT));
-        if (map[OPPONENT].remaining_boats == 0)
-            return PLAYER_ONE;
-
-        do {
+            if (!response(attack, map, p2, OPPONENT)) 
+                continue;
+            if (map[OPPONENT].remaining_boats == 0)
+                return PLAYER_ONE;
+        }
+        for (;;) {
             printf("Player two time, enter a coordinate (x-y): ");
             scanf("%d -%d", &attack.x, &attack.y);
             if (check_quit(attack)) {
@@ -83,11 +84,12 @@ Winner two_players_game(const Info info)
                 destroy_boats(p1, p2, info.boats);
                 exit(EXIT_SUCCESS);
             }
-        } while (!response(attack, map, p2, PLAYER1));
-        if (map[PLAYER1].remaining_boats == 0)
-            return PLAYER_TWO;
+            if (!response(attack, map, p1, PLAYER1)) 
+                continue;
+            if (map[PLAYER1].remaining_boats == 0)
+                return PLAYER_TWO;
+        }
     }
-
     destroy_boats(p1, p2, info.boats);
 }
 
