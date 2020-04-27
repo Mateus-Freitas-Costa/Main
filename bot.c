@@ -126,7 +126,7 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
 
 static bool are_the_same(AI *bot, Boat *attacked)
 {
-    if (bot->level >= 3) {
+    if (bot->level >= 4) {
         return attacked == bot->spot.target;
     } else {
         return attacked->type == bot->spot.target->type;
