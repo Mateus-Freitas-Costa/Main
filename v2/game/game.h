@@ -5,5 +5,6 @@
 
 Winner two_players_game (const Info info);
 Winner bot_game         (const Info info);
+void clear_screen       (void);
 
 #endif /* GAME_H */
