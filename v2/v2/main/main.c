@@ -25,7 +25,7 @@ int main(void)
     scanf("%d", &info.mode);
 
     if (info.mode == 1) {
-        printf("Enter a difficulty (0-6): ");
+        printf("Enter a difficulty (0-6):\n");
         puts("0 - Very easy");
         puts("1 - Easy");
         puts("2 - Medium");
