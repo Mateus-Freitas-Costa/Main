@@ -35,9 +35,8 @@ Winner bot_game(const Info info)
             destroy_boats(p1, p2, info.boats);
             exit(EXIT_SUCCESS);
         }
-        if (!response(attack, map, p2, OPPONENT)) {
-            display(map);
-        }
+        if (!response(attack, map, p2, OPPONENT)) 
+            continue;
         if (map[OPPONENT].remaining_boats == 0)
             return PLAYER_ONE;
 
@@ -48,6 +47,7 @@ Winner bot_game(const Info info)
         if (map[PLAYER1].remaining_boats == 0)
             return BOT;
     }
+    
 
     destroy_boats(p1, p2, info.boats);
 }
@@ -63,29 +63,27 @@ Winner two_players_game(const Info info)
     display(map);
     Point attack;
     for (;;) {
-        printf("Player one time, enter a coordinate (x-y): ");
-        scanf("%d -%d", &attack.x, &attack.y);
-        if (check_quit(attack)) {
-            puts("You quit the game");
-            destroy_boats(p1, p2, info.boats);
-            exit(EXIT_SUCCESS);
-        }
-        if (!response(attack, map, p2, OPPONENT)) {
-            continue;
-        }
+        do {
+            printf("Player one time, enter a coordinate (x-y): ");
+            scanf("%d -%d", &attack.x, &attack.y);
+            if (check_quit(attack)) {
+                puts("You quit the game");
+                destroy_boats(p1, p2, info.boats);
+                exit(EXIT_SUCCESS);
+            }
+        } while (!response(attack, map, p2, OPPONENT));
         if (map[OPPONENT].remaining_boats == 0)
             return PLAYER_ONE;
 
-        printf("Player two time, enter a coordinate (x-y): ");
-        scanf("%d -%d", &attack.x, &attack.y);
-        if (check_quit(attack)) {
-            puts("You quit the game");
-            destroy_boats(p1, p2, info.boats);
-            exit(EXIT_SUCCESS);
-        }
-        if (!response(attack, map, p1, PLAYER1)) {
-            continue;
-        }
+        do {
+            printf("Player two time, enter a coordinate (x-y): ");
+            scanf("%d -%d", &attack.x, &attack.y);
+            if (check_quit(attack)) {
+                puts("You quit the game");
+                destroy_boats(p1, p2, info.boats);
+                exit(EXIT_SUCCESS);
+            }
+        } while (!response(attack, map, p2, PLAYER1));
         if (map[PLAYER1].remaining_boats == 0)
             return PLAYER_TWO;
     }
