@@ -8,6 +8,7 @@ void display_winner(Winner winner);
 
 int main(void)
 {
+    clear_screen();
     Info info;
     puts("This is a battleship game");
     printf("Enter the number of boats you wanna to play with (3-8): ");
