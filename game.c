@@ -75,6 +75,7 @@ Winner two_players_game(const Info info)
                 continue;
             if (map[OPPONENT].remaining_boats == 0)
                 return PLAYER_ONE;
+            break;
         }
         for (;;) {
             printf("Player two time, enter a coordinate (x-y): ");
@@ -88,6 +89,7 @@ Winner two_players_game(const Info info)
                 continue;
             if (map[PLAYER1].remaining_boats == 0)
                 return PLAYER_TWO;
+            break;
         }
     }
     destroy_boats(p1, p2, info.boats);
