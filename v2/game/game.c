@@ -7,7 +7,6 @@
 #include "../bot/bot.h"
 
 
-static void clear_screen     (void);
 static bool destroyed_boat   (Map *map, Boat *p, Point attack);
 static void display          (const Map map[]);
 static void display_HUD      (const Map map[], const int current_height);
@@ -264,7 +263,7 @@ static void display_HUD(const Map *map, const int current_height)
     }
 }
 
-static void clear_screen(void)
+void clear_screen(void)
 {
     #ifdef __linux__ 
     system("clear");
