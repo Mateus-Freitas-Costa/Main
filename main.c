@@ -10,9 +10,9 @@ int main(void)
 {
     Info info;
     puts("This is a battleship game");
-    printf("Enter the number of boats you wanna to use (4-8): ");
+    printf("Enter the number of boats you wanna to play with (3-8): ");
     scanf("%d", &info.boats);
-    if (info.boats > 8 || info.boats < 4) {
+    if (info.boats > 8 || info.boats < 3) {
         puts("Invalid number of boats");
         return 1;
     }
@@ -20,9 +20,9 @@ int main(void)
     scanf("%d", &info.mode);
 
     if (info.mode == 1) {
-        printf("Enter a difficulty (1-5): ");
+        printf("Enter a difficulty (0-5): ");
         scanf("%d", &info.difficulty);
-        if (info.difficulty < 1 || info.difficulty > 5) {
+        if (info.difficulty < 0 || info.difficulty > 5) {
             puts("invalid difficulty");
             return 2;
         }
