@@ -12,29 +12,27 @@ static bool      *get_blocked_direction   (AI *bot);
 static bool       all_blocked             (const AI *bot);
 static bool       are_the_same            (AI *bot, Boat *attacked);
 
-
-
 void create_bot(AI *bot, const unsigned int d)
 {
     bot->buff.count = 0;
     switch (d) {
     case 0:
-        bot->level = 0;
+        bot->level = 1;
         break;
     case 1:
-        bot->level = 2;
+        bot->level = 3;
         break;
     case 2:
-        bot->level = 3;
+        bot->level = 4;
         break;  
     case 3:
         bot->level = 5;
         break;
     case 4:
-        bot->level = 6;
+        bot->level = 7;
         break;
     case 5:
-        bot->level = 8;
+        bot->level = 9;
         break;
     case 6:
         bot->level = 10;
@@ -46,7 +44,7 @@ void create_bot(AI *bot, const unsigned int d)
 
 Point bot_time(AI *bot, Map *map, Boat *p[])
 {
-    if (bot->state.searching || bot->level == 0)
+    if (bot->state.searching || bot->level == 1)
         return new_attack(bot, map, p);
     else 
         return continue_attack(bot, map, p);
@@ -127,10 +125,10 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
     Boat *attacked = get_boat(p, attack, map->info.boats);
     if (attacked == NULL) {
         *get_blocked_direction(bot) = true;
-        if (bot->state.right_axis && bot->level >= 3)
+        if (bot->state.right_axis && bot->level >= 4)
             bot->state.arrow = reverse_arrow(bot->state.arrow);
         bot->spot.current_cor = bot->spot.ghost_cor;
-        if (bot->level == 10)
+        if (bot->level >=10)
             return continue_attack(bot, map, p);
     } else if (are_the_same(bot, attacked)) {
         bot->state.right_axis = true;
@@ -144,14 +142,14 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
     return attack;
 }
 
-    static bool are_the_same(AI *bot, Boat *attacked)
-    {
-        if (bot->level >= 6) {
-            return attacked == bot->spot.target;
-        } else {
-            return attacked->type == bot->spot.target->type;
-        }
+static bool are_the_same(AI *bot, Boat *attacked)
+{
+    if (bot->level >= 7) {
+        return attacked == bot->spot.target;
+    } else {
+        return attacked->type == bot->spot.target->type;
     }
+}
 
 static bool *get_blocked_direction(AI *bot)
 {
