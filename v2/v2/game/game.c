@@ -18,6 +18,7 @@ static void destroy_boats    (Boat *p1[], Boat *p2[], size_t boats);
 
 Winner bot_game(const Info info)
 {
+    // Those pointers are the most stupid thing you ever have seen
     Boat *p1[info.boats];
     Boat *p2[info.boats];
     Map   map[MAX_PLAYERS];
