@@ -128,7 +128,7 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
         if (bot->state.right_axis && bot->level >= 4)
             bot->state.arrow = reverse_arrow(bot->state.arrow);
         bot->spot.current_cor = bot->spot.ghost_cor;
-        if (bot->level >=10)
+        if (bot->level >= 10)
             return continue_attack(bot, map, p);
     } else if (are_the_same(bot, attacked)) {
         bot->state.right_axis = true;
@@ -138,6 +138,8 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
             queue(&bot->buff, attacked, attack);
         *get_blocked_direction(bot) = true;
         bot->spot.current_cor = bot->spot.ghost_cor;
+        if (bot->state.right_axis && bot->level >= 4)
+            bot->state.arrow = reverse_arrow(bot->state.arrow);
     }
     return attack;
 }
