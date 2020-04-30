@@ -52,11 +52,9 @@ typedef struct {
 } Boat;
 
 
-void     create_map              (Boat *p1[], Boat *p2[], Map map[], const Info info);
+void     create_map              (Boat *p1[], Boat *p2[], Map map[], Info info);
 Boat    *get_boat                (Boat *p[], const Point attack, size_t boats);
-// this function is also useless
-int      get_coordinate_location (const Boat *p, const Point attack);
-Validity check_valid             (const Point attack, const Camp sea[][WIDTH]);
-void     update_HUD              (Hud *HUD, const Types type, int change);
+Validity check_valid             (Point attack, const Camp sea[][WIDTH]);
+void     update_HUD              (Hud *HUD, Types type, int change);
 
 #endif /* BATTLE_H */
