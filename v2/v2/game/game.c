@@ -9,14 +9,14 @@
 
 static bool destroyed_boat   (Map *map, Boat *p, Point attack);
 static void display          (const Map map[]);
-static void display_HUD      (const Map map[], const int current_height);
-static bool check_quit       (const Point input);
-static bool response         (Point attack, Map map[], Boat *p[], const Player enemy);
-static void bot_response     (Map map[], const Point attack, Boat *p[]);
+static void display_HUD      (const Map map[], int current_height);
+static bool check_quit       (Point input);
+static bool response         (Point attack, Map map[], Boat *p[],  Player enemy);
+static void bot_response     (Map map[], Point attack, Boat *p[]);
 static void destroy_boats    (Boat *p1[], Boat *p2[], size_t boats);
 
 
-Winner bot_game(const Info info)
+Winner bot_game(Info info)
 {
     // Those pointers are the most stupid thing you ever have seen
     Boat *p1[info.boats];
@@ -53,7 +53,7 @@ Winner bot_game(const Info info)
 }
 
 
-Winner two_players_game(const Info info)
+Winner two_players_game(Info info)
 {
     Boat *p1[info.boats];
     Boat *p2[info.boats];
@@ -95,7 +95,7 @@ Winner two_players_game(const Info info)
     destroy_boats(p1, p2, info.boats);
 }
 
-static bool response(Point attack, Map map[], Boat *p[], const Player enemy)
+static bool response(Point attack, Map map[], Boat *p[], Player enemy)
 {
     Validity result;
     if ((result = check_valid(attack, map[enemy].sea)) == OUTRANGE) {
@@ -108,16 +108,13 @@ static bool response(Point attack, Map map[], Boat *p[], const Player enemy)
         puts("You cannot attack the same point again");
         return false;
     }
-    if (map[enemy].sea[attack.y][attack.x] == INACTIVE) {
+
+    Boat *attacked = get_boat(p, attack, map->info.boats);
+    if (attacked == NULL) {
         map[enemy].sea[attack.y][attack.x] = MISSED;
         display(map);
         puts("You missed");
-        return true;
-    }
-    Boat *attacked = get_boat(p, attack, map->info.boats);
-    int index = get_coordinate_location(attacked, attack);
-    attacked->coordinates[index].active = false;
-    if (destroyed_boat(&map[enemy], attacked, attack)) {
+    } else if (destroyed_boat(&map[enemy], attacked, attack)) {
         update_HUD(&map[enemy].HUD, attacked->type, -1);
         display(map);
         printf("You destroyed %s\n", attacked->name);
@@ -128,18 +125,14 @@ static bool response(Point attack, Map map[], Boat *p[], const Player enemy)
     return true;
 }
 
-static void bot_response(Map map[], const Point attack, Boat *p[])
+static void bot_response(Map map[], Point attack, Boat *p[])
 {
-    if (map[PLAYER1].sea[attack.y][attack.x] == INACTIVE) {
+    Boat *attacked = get_boat(p, attack, map[PLAYER1].info.boats);
+    if (attacked == NULL) {
         map[PLAYER1].sea[attack.y][attack.x] = MISSED;
         display(map);
         puts("The BOT missed");
-        return;
-    }
-    Boat *attacked = get_boat(p, attack, map[PLAYER1].info.boats);
-    int index = get_coordinate_location(attacked, attack);
-    attacked->coordinates[index].active = false;
-    if (destroyed_boat(&map[PLAYER1], attacked, attack)) {
+    } else if (destroyed_boat(&map[PLAYER1], attacked, attack)) {
         update_HUD(&map[PLAYER1].HUD, attacked->type, -1);
         display(map);
         printf("The BOT destroyed your %s\n", attacked->name);
@@ -163,7 +156,7 @@ static bool destroyed_boat(Map *map, Boat *p, Point attack)
     return false;
 }
 
-static void destroy_boats(Boat *p1[], Boat *p2[], const size_t boats)
+static void destroy_boats(Boat *p1[], Boat *p2[], size_t boats)
 {
     for (int i = 0; i < boats; ++i) {
         if (p1[i] != NULL) {
@@ -179,7 +172,7 @@ static void destroy_boats(Boat *p1[], Boat *p2[], const size_t boats)
 
 
 
-static bool check_quit(const Point input)
+static bool check_quit(Point input)
 {
     return input.y == -1 || input.x == -1;
 }
@@ -240,7 +233,7 @@ static void display(const Map map[])
     } 
 }
 
-static void display_HUD(const Map *map, const int current_height)
+static void display_HUD(const Map *map, int current_height)
 {
     Player current_player;
     if (current_height < HEIGHT / MAX_PLAYERS)
