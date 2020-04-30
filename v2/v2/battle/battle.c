@@ -3,11 +3,11 @@
 
 #include "battle.h"
 
-static Boat  *create_boat   (const Types type, const int size, Camp sea[HEIGHT][WIDTH]);
-static char  *get_name      (const Types type);
-static bool   match_points  (const Point p1, const Point p2);
+static Boat  *create_boat   (Types type,  int size, char *name, Camp sea[HEIGHT][WIDTH]);
+static char  *get_name      (Types type);
+static bool   match_points  (Point p1, Point p2);
 
-Boat *get_boat(Boat *p[], const Point attack, const size_t boats)
+Boat *get_boat(Boat *p[], Point attack, size_t boats)
 {
      for (int i = 0; i < boats; ++i) 
         for (int j = 0; j < p[i]->size; ++j) 
@@ -16,19 +16,19 @@ Boat *get_boat(Boat *p[], const Point attack, const size_t boats)
     return NULL;
 }
 
-int get_coordinate_location(const Boat *p, const Point attack)
+int get_coordinate_location(const Boat *p, Point attack)
 {   
     for (int i = 0; i < p->size; ++i) 
         if (match_points(attack, p->coordinates[i].p))
             return i;
 }
 
-static bool match_points(const Point p1, const Point p2)
+static bool match_points(Point p1, Point p2)
 {
     return p1.x == p2.x && p1.y == p2.y;
 }
 
-Validity check_valid(const Point attack, const Camp sea[][WIDTH])
+Validity check_valid(Point attack, const Camp sea[][WIDTH])
 {
     if (attack.x >= WIDTH || attack.y >= HEIGHT || 
     attack.x < 0 || attack.y < 0)
@@ -39,11 +39,14 @@ Validity check_valid(const Point attack, const Camp sea[][WIDTH])
     return REPEATED;
 }
 
-void create_map(Boat *p1[], Boat *p2[], Map map[], const Info info)
+void create_map(Boat *p1[], Boat *p2[], Map map[],Info info)
 {
     const Types pattern[5] = {DESTROYER, SUBMARINE, CRUISER,
                                          BATTLESHIP, CARRIER};
     const int pattern_size[5] = {2, 3, 3, 4, 5};
+
+    static const char *names[5] = {"Destroyer", "Submarine", "Cruiser", "Battleship",
+                                    "Carrier"};
 
     for (int i = 0; i < MAX_PLAYERS; ++i) {
         map[i].remaining_boats = 0;
@@ -62,12 +65,13 @@ void create_map(Boat *p1[], Boat *p2[], Map map[], const Info info)
     for (int i = 0; i < info.boats; ++i) {
         Types type = pattern[i % 5];
         int size = pattern_size[type];
-        while ((p1[i] = create_boat(type, size, map[PLAYER1].sea)) == NULL)
+        char *name = names[type];
+        while ((p1[i] = create_boat(type, size, name,  map[PLAYER1].sea)) == NULL)
             continue;
         update_HUD(&map[PLAYER1].HUD, type, +1);
         ++map[PLAYER1].remaining_boats;
 
-        while ((p2[i] = create_boat(type, size, map[OPPONENT].sea)) == NULL)
+        while ((p2[i] = create_boat(type, size, name, map[OPPONENT].sea)) == NULL)
             continue;
         update_HUD(&map[OPPONENT].HUD, type, +1);
         ++map[OPPONENT].remaining_boats;
@@ -75,7 +79,7 @@ void create_map(Boat *p1[], Boat *p2[], Map map[], const Info info)
 
 }
 
-void update_HUD(Hud *HUD, const Types type, int change)
+void update_HUD(Hud *HUD, Types type, int change)
 {
     switch (type) {
     case DESTROYER:
@@ -97,7 +101,7 @@ void update_HUD(Hud *HUD, const Types type, int change)
 }
 
 
-static Boat *create_boat(const Types type, const int size, Camp sea[HEIGHT][WIDTH])
+static Boat *create_boat(Types type, int size, char *name, Camp sea[HEIGHT][WIDTH])
 {
     Boat *new = malloc(sizeof(*new));
     if (new == NULL) 
@@ -141,7 +145,7 @@ static Boat *create_boat(const Types type, const int size, Camp sea[HEIGHT][WIDT
     }
     new->lifes = size;
     new->size  = size;
-    new->name  = get_name(type); 
+    new->name  = name; 
     new->type = type;
     for (int i = 0; i < size; ++i) 
             sea[new->coordinates[i].p.y]
@@ -150,23 +154,3 @@ static Boat *create_boat(const Types type, const int size, Camp sea[HEIGHT][WIDT
     return new;
 }
 
-static char  *get_name(const Types type)
-{ 
-    switch (type) {
-    case DESTROYER:
-        return "Destroyer";
-        break;
-    case SUBMARINE:
-        return "Submarine";
-        break;
-    case CARRIER:  
-        return "Carrier";
-        break;
-    case BATTLESHIP:
-        return "Battleship";
-        break;
-    case CRUISER:
-        return "Cruiser";
-        break;
-    } 
-}
