@@ -3,19 +3,20 @@
 #include "bot.h"
 
 static void       restart                 (AI *bot);
-static Previous   enqueue                 (Buff *buff);
-static void       queue                   (Buff *buff, Boat *b, Point attack);
+static Point      enqueue                 (Buff *buff);
+static void       queue                   (Buff *buff, Point attack);
 static Point      continue_attack         (AI *bot, Map *map, Boat *p[]);
 static Point      new_attack              (AI *bot, Map *map, Boat *p[]);
-static Arrow      reverse_arrow           (const Arrow a);
+static Arrow      reverse_arrow           (Arrow a);
 static bool      *get_blocked_direction   (AI *bot);
 static bool       all_blocked             (const AI *bot);
-static bool       are_the_same            (AI *bot, Boat *attacked);
+static bool       are_the_same            (const AI *bot,const Boat *attacked);
+static void       goto_initial_point      (AI *bot);
 
-void create_bot(AI *bot, const unsigned int d)
+void create_bot(AI *bot, unsigned int difficulty)
 {
     bot->buff.count = 0;
-    switch (d) {
+    switch (difficulty) {
     case 0:
         bot->level = 1;
         break;
@@ -32,13 +33,12 @@ void create_bot(AI *bot, const unsigned int d)
         bot->level = 7;
         break;
     case 5:
-        bot->level = 9;
+        bot->level = 8;
         break;
     case 6:
         bot->level = 10;
         break;
     }
-    bot->spot.target = NULL;
     restart(bot);
 }
 
@@ -76,9 +76,8 @@ static Point new_attack(AI *bot, Map *map, Boat *p[])
         }
         return attack;
     } else {
-        Previous previous = enqueue(&bot->buff);
-        bot->spot.target = previous.target;
-        bot->spot.current_cor = bot->spot.ghost_cor = previous.cor;
+        bot->spot.current_cor = bot->spot.ghost_cor = enqueue(&bot->buff);
+        bot->spot.target = get_boat(p, bot->spot.current_cor, map->info.boats);
         bot->state.searching = false;
         return continue_attack(bot, map, p);
     }
@@ -117,34 +116,38 @@ static Point continue_attack(AI *bot, Map *map, Boat *p[])
     Point attack = bot->spot.current_cor;
 
     if (check_valid(attack, map->sea) != VALID) {
-        bot->state.right_axis = false;
-        *get_blocked_direction(bot) = true;
-        bot->spot.current_cor = bot->spot.ghost_cor;
+        goto_initial_point(bot);
         return continue_attack(bot, map, p);
     }
     Boat *attacked = get_boat(p, attack, map->info.boats);
     if (attacked == NULL) {
-        *get_blocked_direction(bot) = true;
-        if (bot->state.right_axis && bot->level >= 4)
-            bot->state.arrow = reverse_arrow(bot->state.arrow);
-        bot->spot.current_cor = bot->spot.ghost_cor;
-        if (bot->level >= 10)
+        goto_initial_point(bot);
+        if (bot->level == 10)
             return continue_attack(bot, map, p);
+        if (bot->level == 8) {
+            int chance = rand() % 10;
+            if (chance <= 5)
+                return continue_attack(bot, map, p);
+        }
     } else if (are_the_same(bot, attacked)) {
         bot->state.right_axis = true;
     } else {
-        bot->state.right_axis = false;
         if (bot->level >= 5 && bot->buff.count <= BUFF_SIZE)
-            queue(&bot->buff, attacked, attack);
-        *get_blocked_direction(bot) = true;
-        bot->spot.current_cor = bot->spot.ghost_cor;
-        if (bot->state.right_axis && bot->level >= 4)
-            bot->state.arrow = reverse_arrow(bot->state.arrow);
+            queue(&bot->buff, attack);
+        goto_initial_point(bot);
     }
     return attack;
 }
 
-static bool are_the_same(AI *bot, Boat *attacked)
+static void goto_initial_point(AI *bot)
+{
+    *get_blocked_direction(bot) = true;
+    if (bot->state.right_axis && bot->level >= 4)
+        bot->state.arrow = reverse_arrow(bot->state.arrow);
+    bot->spot.current_cor = bot->spot.ghost_cor;
+}
+
+static bool are_the_same(const AI *bot, const Boat *attacked)
 {
     if (bot->level >= 7) {
         return attacked == bot->spot.target;
@@ -171,33 +174,23 @@ static bool *get_blocked_direction(AI *bot)
     }
 }
 
-static Previous enqueue(Buff *buff)
+static Point enqueue(Buff *buff)
 {
-    Previous element = buff->boat[0];
+    Point element = buff->previous[0];
     for (int i = 0; i < buff->count - 1; ++i)
-        buff->boat[i] = buff->boat[i + 1];
+        buff->previous[i] = buff->previous[i + 1];
     --buff->count;
     return element;
 }
 
-static void queue(Buff *buff, Boat *attacked, Point attack)
+static void queue(Buff *buff, Point attack)
 {
-    buff->boat[buff->count].target = attacked;
-    buff->boat[buff->count++].cor  = attack;
+    buff->previous[buff->count++] = attack;
 }
 
-static Arrow reverse_arrow(const Arrow arrow)
+static Arrow reverse_arrow(Arrow arrow)
 {
-    switch (arrow) {
-    case UP:
-        return DOWN;
-    case DOWN:
-        return UP;
-    case LEFT:
-        return RIGHT;
-    case RIGHT:
-        return LEFT;
-    }
+    return (arrow + 2) % NUMBER_DIRECTIONS; 
 }
 
 static void restart(AI *bot)
@@ -209,6 +202,7 @@ static void restart(AI *bot)
     bot->state.searching = true;
     bot->state.right_axis = false;
     bot->state.count_tries = 0;
+    bot->spot.target = NULL;
 }
 
 static bool all_blocked(const AI *bot)
