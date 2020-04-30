@@ -6,15 +6,10 @@
 
 #include "../battle/battle.h"
 
-typedef enum {UP, DOWN, RIGHT, LEFT} Arrow;
+typedef enum {UP, RIGHT, DOWN, LEFT} Arrow;
 
 typedef struct {
-    Boat *target;
-    Point cor;
-} Previous;
-
-typedef struct {
-    Previous       boat[BUFF_SIZE];
+    Point          previous[BUFF_SIZE];
     unsigned int   count;
 } Buff;
 
@@ -45,6 +40,6 @@ typedef struct {
 } AI;
 
 Point bot_time       (AI *bot, Map *map, Boat *p[]);
-void  create_bot     (AI *bot, const unsigned int d);
+void  create_bot     (AI *bot, unsigned int difficulty);
 
 #endif /* BOT_H */
