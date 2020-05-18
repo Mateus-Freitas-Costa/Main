@@ -39,7 +39,7 @@ typedef struct {
     
 } AI;
 
-Point bot_time       (AI *bot, Map *map, Boat *p[]);
-void  create_bot     (AI *bot, unsigned int difficulty);
+Point bot_time(AI *bot, Map *map, Boat *boats);
+AI *create_bot    (unsigned int difficulty);
 
 #endif /* BOT_H */
