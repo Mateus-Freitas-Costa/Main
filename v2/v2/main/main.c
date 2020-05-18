@@ -43,7 +43,7 @@ int main(void)
         puts("5 - Insane");
         puts("6 - Impossible");
 
-	    fgets_(input, 3, stdin);
+	fgets_(input, 3, stdin);
         sscanf(input, "%d", &info.difficulty);
         if (info.difficulty < 0 || info.difficulty > 6) {
             puts("invalid difficulty");
