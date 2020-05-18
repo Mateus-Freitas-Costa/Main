@@ -4,10 +4,10 @@
 #include <stdio.h>
 
 #include "../main/extra.h"
+#include "../battle/battle.h"
 
-Winner play_game(Info info);
-// not working outside
-void clear_screen       (void);
+Instance play_game(Info info);
+void clear_screen(void);
 char *fgets_            (char *str, size_t size, FILE *stream);
 
 #endif /* GAME_H */
