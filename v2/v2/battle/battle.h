@@ -2,8 +2,10 @@
 #define BATTLE_H
 
 #include "../main/extra.h"
+#include "../game/game.h"
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define WIDTH              8
 #define HEIGHT             8
@@ -17,6 +19,7 @@ typedef enum  {INACTIVE, ACTIVE, DESTROYED, MISSED,
                SUNK}                                   Camp;
 typedef enum  {PLAYER1, OPPONENT}                      Player;
 typedef enum  {OUTRANGE, REPEATED, VALID}              Validity;
+typedef enum {HUMAN, CPU} Tag;
 
 typedef struct {
     int x;
@@ -31,7 +34,6 @@ typedef struct {
     unsigned int submarines;
 } Hud;
 
-
 typedef struct {
     Camp           sea[HEIGHT][WIDTH];
     unsigned int   remaining_boats;
@@ -43,18 +45,21 @@ typedef struct {
     size_t          size;
     Types           type;
     unsigned int    lifes;   
-    char           *name;
-    struct {
-        // this bool is completely useless
-        bool  active; 
-        Point p;
-    } *coordinates;
+    const char     *name;
+    Point          *p;
 } Boat;
 
+typedef struct Instance {
+    Winner name;
+    Tag tag;
+    Player enemy;
+    void *self;
+    Point (*attack_func)(struct Instance *, Map *, Boat *);
+} Instance;
 
-void     create_map              (Boat *p1[], Boat *p2[], Map map[], Info info);
-Boat    *get_boat                (Boat *p[], const Point attack, size_t boats);
-Validity check_valid             (Point attack, const Camp sea[][WIDTH]);
 void     update_HUD              (Hud *HUD, Types type, int change);
+Boat      *get_boat(Boat *boats, Point attack, size_t boats_count);
+void     create_map(Info info, Map *map, Boat boats[MAX_PLAYERS][info.boats]);
+Validity check_valid(Camp sea[HEIGHT][WIDTH], Point attack);
 
 #endif /* BATTLE_H */
