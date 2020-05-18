@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "game.h"
 #include "../battle/battle.h"
@@ -11,13 +12,14 @@ static void display(const Map map[]);
 static bool destroyed_boat(Map *map, Boat *boat, Point attack);
 static Point input_attack_player(char *self_name);
 static Point attack_player(Instance *instance, Map *map, Boat *boats);
-static void create_player(Instance *new_instance, Tag tag, char *idenfifier, Player enemy, Winner name);
 static Point bot_response(Instance *instance, Map *map, Boat *boats);
+static void create_new_instance(Instance *new_instance, Tag tag, void *self, Player enemy,
+                                char *name, Point (*f_atx)(Instance *, Map *, Boat *));
 static bool round(Instance *instance, Map *map, size_t boats_count, Boat boats[MAX_PLAYERS][boats_count]);
 static void create_instances(Instance *instances, Info info);
 static void destroy_instances(Instance *instances, int boats_count, Boat boats[MAX_PLAYERS][boats_count]);
 
-Winner play_game(Info info)
+Instance play_game(Info info)
 {
     Boat boats[MAX_PLAYERS][info.boats];
     Instance instances[MAX_PLAYERS];
@@ -32,7 +34,7 @@ Winner play_game(Info info)
         bool victory = round(&instances[i], map, info.boats, boats);
         if (victory) {
             destroy_instances(instances, info.boats, boats);
-            return instances[i].name;
+            return instances[i];
         }
         i = instances[i].enemy;
     }
@@ -51,18 +53,14 @@ static void destroy_instances(Instance *instances, int boats_count, Boat boats[M
 
 static void create_instances(Instance *instances, Info info)
 {
-    create_player(&instances[PLAYER1], HUMAN, "Player one", OPPONENT, PLAYER_ONE);
+    create_new_instance(&instances[PLAYER1], HUMAN, NULL, OPPONENT, info.namep1, attack_player);
 
     switch (info.mode) {
     case 1:
-        instances[OPPONENT].tag = CPU;
-        instances[OPPONENT].name = BOT;
-        instances[OPPONENT].attack_func = bot_response;
-        instances[OPPONENT].self = create_bot(info.difficulty);
-        instances[OPPONENT].enemy = PLAYER1;
+        create_new_instance(&instances[OPPONENT], CPU, create_bot(info.difficulty), PLAYER1, info.namep2,bot_response);
         break;
     case 2:
-        create_player(&instances[OPPONENT], HUMAN, "Player Two", PLAYER1, PLAYER_TWO);
+        create_new_instance(&instances[OPPONENT], HUMAN, NULL, PLAYER1, info.namep2, attack_player);
         break;
     }
 }
@@ -72,6 +70,7 @@ static bool round(Instance *instance, Map *map, size_t boats_count, Boat boats[M
     Point attack = instance->attack_func(instance, map, boats[instance->enemy]);
     char *msgs_attacks[MAX_PLAYERS][3] = {{"You attacked ", "You destroyed ", "You Missed"},
                                           {"The Bot attacked your ", "The bot destroyed your ", "The bot Missed"}};
+
     char msg_attack[25];
     Boat *attacked = get_boat(boats[instance->enemy], attack, boats_count);
 
@@ -80,10 +79,9 @@ static bool round(Instance *instance, Map *map, size_t boats_count, Boat boats[M
         map[instance->enemy].sea[attack.y][attack.x] = MISSED;
     } else {
         int index_msg;
-
         if (destroyed_boat(&map[instance->enemy], attacked, attack)) {
             index_msg = 1;
-            update_HUD(&map[instance->enemy].HUD, attacked->type, -1);
+            update_hud(&map[instance->enemy].HUD, attacked->type, -1);
         } else
             index_msg = 0;
         sprintf(msg_attack, "%s%s", msgs_attacks[instance->tag][index_msg], attacked->name);
@@ -102,13 +100,14 @@ static Point bot_response(Instance *instance, Map *map, Boat *boats)
     return bot_time(instance->self, map, boats);
 }
 
-static void create_player(Instance *new_instance, Tag tag, char *idenfifier, Player enemy, Winner name)
+static void create_new_instance(Instance *new_instance, Tag tag, void *self, Player enemy,
+                                char *name, Point (*f_atx)(Instance *, Map *, Boat *))
 {
     new_instance->enemy = enemy;
-    new_instance->self = idenfifier;
-    new_instance->name = name;
-    new_instance->attack_func = attack_player;
-    new_instance->tag = HUMAN;
+    new_instance->self = self;
+    strcpy(new_instance->name, name);
+    new_instance->attack_func = f_atx;
+    new_instance->tag = tag;
 }
 
 static Point attack_player(Instance *instance, Map *map, Boat *boats)
@@ -118,7 +117,7 @@ static Point attack_player(Instance *instance, Map *map, Boat *boats)
     Validity validity;
 
     do {
-        attack = input_attack_player(instance->self);
+        attack = input_attack_player(instance->name);
         validity = check_valid(map[instance->enemy].sea, attack);
         if (validity != VALID) {
             display(map);
@@ -172,8 +171,8 @@ static void display(const Map map[])
                 printf("             ");
                 printf("_  _  _  _  _  _  _  _");
                 printf("                                   ");
-                printf("          ");
-                printf("Player One\n");
+                printf("             ");
+                printf("%s\n", map[0].info.namep1);
             }
             for (int k = 0; k < WIDTH; ++k) {
                 if (k == 0)
@@ -198,10 +197,7 @@ static void display(const Map map[])
             if (i == 4 && j == OPPONENT) {
                 printf("                   "
                         "                  ");
-                if (map[0].info.mode == 1)
-                    printf("    BOT");
-                else 
-                    printf("Player two");
+                printf("   %s", map[0].info.namep2);
             }
         }
         display_HUD(map, i);
@@ -219,28 +215,20 @@ static void display_HUD(const Map *map, int current_height)
 
     printf("                              ");
     switch (current_height % 5) {
-        case 0:
-            printf("Destroyers: %u  |  Cruisers: %u", map[current_player].HUD.destroyers, 
-                    map[current_player].HUD.cruisers);
-            break;
-        case 1:
-            printf("Submarines: %u  |  Battleships: %u ", map[current_player].HUD.submarines,
-                    map[current_player].HUD.battleships);
-            break;
-        case 2:
-            printf("Carriers: %u    |", map[current_player].HUD.carriers);
-            break;
+    case 0:
+        printf("Destroyers: %u  |  Cruisers: %u", map[current_player].HUD.destroyers, 
+                map[current_player].HUD.cruisers);
+        break;
+    case 1:
+        printf("Submarines: %u  |  Battleships: %u ", map[current_player].HUD.submarines,
+                map[current_player].HUD.battleships);
+        break;
+    case 2:
+        printf("Carriers: %u    |", map[current_player].HUD.carriers);
+        break;
     }
 }
 
-void clear_screen(void)
-{
-#ifdef __linux__ 
-    system("clear");
-#elif defined WIN32
-    system("cls");
-#endif
-}
 
 char *fgets_(char *str, size_t size, FILE *stream)
 {
@@ -255,4 +243,13 @@ char *fgets_(char *str, size_t size, FILE *stream)
     str[i] = '\0';
 
     return str;
+}
+
+void clear_screen(void)
+{
+#ifdef WIN32
+    system("cls");
+#elif defined __linux__
+    system("clear");
+#endif
 }
