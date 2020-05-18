@@ -10,9 +10,9 @@ static void display_HUD(const Map *map, int current_height);
 static void display(const Map map[]);
 static bool destroyed_boat(Map *map, Boat *boat, Point attack);
 static Point input_attack_player(char *self_name);
-static Point attack_player(Instance *instance, Map *map_game, Boat *boats);
+static Point attack_player(Instance *instance, Map *map, Boat *boats);
 static void create_player(Instance *new_instance, Tag tag, char *idenfifier, Player enemy, Winner name);
-static Point bot_response(Instance *instance, Map *map_game, Boat *boats);
+static Point bot_response(Instance *instance, Map *map, Boat *boats);
 static bool round(Instance *instance, Map *map, size_t boats_count, Boat boats[MAX_PLAYERS][boats_count]);
 static void create_instances(Instance *instances, Info info);
 static void destroy_instances(Instance *instances, int boats_count, Boat boats[MAX_PLAYERS][boats_count]);
@@ -111,10 +111,9 @@ static void create_player(Instance *new_instance, Tag tag, char *idenfifier, Pla
     new_instance->tag = HUMAN;
 }
 
-static Point attack_player(Instance *instance, Map *map_game, Boat *boats)
+static Point attack_player(Instance *instance, Map *map, Boat *boats)
 {
     char *msg_invalid[2] = {"Outside of range", "You cannot attack the same point again"};
-    Map *map = map_game;
     Point attack;
     Validity validity;
 
