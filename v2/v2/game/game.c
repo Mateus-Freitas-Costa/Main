@@ -9,7 +9,6 @@
 static void display_HUD(const Map *map, int current_height);
 static void display(const Map map[]);
 static bool destroyed_boat(Map *map, Boat *boat, Point attack);
-static bool check_quit(Point input);
 static Point input_attack_player(char *self_name);
 static Point attack_player(Instance *instance, Map *map_game, Boat *boats);
 static void create_player(Instance *new_instance, Tag tag, char *idenfifier, Player enemy, Winner name);
@@ -153,11 +152,6 @@ static bool destroyed_boat(Map *map, Boat *boat, Point attack)
         return true;
     } else
         return false;
-}
-
-static bool check_quit(Point input)
-{
-    return input.y == -1 || input.x == -1;
 }
 
 static void display(const Map map[])
