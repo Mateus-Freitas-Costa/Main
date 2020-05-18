@@ -65,7 +65,7 @@ static void create_instances(Instance *instances, Info info)
     }
 }
 
-static bool round(Instance *instance, Map *map, size_t boats_count, Boat boats[MAX_PLAYERS][boats_count])
+static bool round(Instance *instance, Map *map, int boats_count, Boat boats[MAX_PLAYERS][boats_count])
 {
     Point attack = instance->attack_func(instance, map, boats[instance->enemy]);
     char *msgs_attacks[MAX_PLAYERS][3] = {{"You attacked ", "You destroyed ", "You Missed"},
