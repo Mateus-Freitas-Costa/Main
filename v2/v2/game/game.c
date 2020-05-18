@@ -101,11 +101,9 @@ static bool round(Instance *instance, Map *map, size_t boats_count, Boat boats[M
 
 static Point bot_response(Instance *instance, Map *map, Boat *boats)
 {
-    AI *bot = instance->self;
-
     puts("Bot time\n");
     sleep(1);
-    return bot_time(bot, map, boats);
+    return bot_time(instance->self, map, boats);
 }
 
 static void create_player(Instance *new_instance, Tag tag, char *idenfifier, Player enemy, Winner name)
