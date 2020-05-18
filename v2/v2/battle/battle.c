@@ -7,7 +7,7 @@
 
 static bool create_boat(Boat *new, Boat *boats, Camp sea[HEIGHT][WIDTH], size_t size, Types type, const char *name);
 
-Boat *get_boat(Boat *boats, Point attack, size_t boats_count)
+Boat *get_boat(Boat *boats, Point attack, int boats_count)
 {
     for (int i = 0; i < boats_count; ++i) 
         for (int j = 0; j < boats[i].size; ++j)
@@ -88,7 +88,7 @@ void update_hud(Hud *HUD, Types type, int change)
 }
 
 
-static bool create_boat(Boat *new, Boat *boats, Camp sea[HEIGHT][WIDTH], size_t size, Types type, const char *name)
+static bool create_boat(Boat *new, Boat *boats, Camp sea[HEIGHT][WIDTH], unsigned int size, Types type, const char *name)
 {
     new->p= malloc(size * sizeof(*new->p));
     if (new->p == NULL) {
