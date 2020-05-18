@@ -47,7 +47,7 @@ void create_map(Info info, Map *map, Boat boats[MAX_PLAYERS][info.boats])
         for (Player j = 0; j < MAX_PLAYERS; ++j) {
             while (!create_boat(&boats[j][i], boats[j], map[j].sea, size, type, name))
                 ;
-            update_HUD(&map[j].HUD, type, +1);
+            update_hud(&map[j].HUD, type, +1);
             ++map[j].remaining_boats;
         }
     }
