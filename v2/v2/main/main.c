@@ -11,11 +11,7 @@ void display_winner(Instance winner, Info info);
 
 int main(void)
 {
-#ifdef  __linux__
-    system("clear");
-#elif define WIN32
-    system("cls");
-#endif
+    clear_screen();
 
     Info info;
     char input[4];
