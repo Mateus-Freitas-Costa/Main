@@ -3,50 +3,28 @@
 
 #include "battle.h"
 
-static Boat  *create_boat   (Types type,  int size, char *name, Camp sea[HEIGHT][WIDTH]);
-static char  *get_name      (Types type);
-static bool   match_points  (Point p1, Point p2);
+#define match_points(p1, p2) (p1.x == p2.x && p1.y == p2.y)
 
-Boat *get_boat(Boat *p[], Point attack, size_t boats)
+static bool create_boat(Boat *new, Boat *boats, Camp sea[HEIGHT][WIDTH], size_t size, Types type, const char *name);
+
+Boat *get_boat(Boat *boats, Point attack, size_t boats_count)
 {
-     for (int i = 0; i < boats; ++i) 
-        for (int j = 0; j < p[i]->size; ++j) 
-            if (match_points(attack, p[i]->coordinates[j].p)) 
-                return p[i];
+    for (int i = 0; i < boats_count; ++i) 
+        for (int j = 0; j < boats[i].size; ++j)
+            if (match_points(boats[i].p[j], attack))
+                    return &boats[i];
     return NULL;
 }
 
-int get_coordinate_location(const Boat *p, Point attack)
-{   
-    for (int i = 0; i < p->size; ++i) 
-        if (match_points(attack, p->coordinates[i].p))
-            return i;
-}
 
-static bool match_points(Point p1, Point p2)
+void create_map(Info info, Map *map, Boat boats[MAX_PLAYERS][info.boats])
 {
-    return p1.x == p2.x && p1.y == p2.y;
-}
+    const Types pattern[5] = {CARRIER, SUBMARINE, DESTROYER,
+                                         BATTLESHIP, CRUISER};
+    const int pattern_size[5] = {5, 3, 2, 4, 3};
 
-Validity check_valid(Point attack, const Camp sea[][WIDTH])
-{
-    if (attack.x >= WIDTH || attack.y >= HEIGHT || 
-    attack.x < 0 || attack.y < 0)
-        return OUTRANGE;
-    if (sea[attack.y][attack.x] == INACTIVE || 
-    sea[attack.y][attack.x] == ACTIVE)
-        return VALID;
-    return REPEATED;
-}
-
-void create_map(Boat *p1[], Boat *p2[], Map map[],Info info)
-{
-    const Types pattern[5] = {DESTROYER, SUBMARINE, CRUISER,
-                                         BATTLESHIP, CARRIER};
-    const int pattern_size[5] = {2, 3, 3, 4, 5};
-
-    static const char *names[5] = {"Destroyer", "Submarine", "Cruiser", "Battleship",
-                                    "Carrier"};
+    static const char *names[5] = {"Carrier", "Submarine", "Destroyer", "Battleship",
+                                    "Cruiser"};
 
     for (int i = 0; i < MAX_PLAYERS; ++i) {
         map[i].remaining_boats = 0;
@@ -56,27 +34,36 @@ void create_map(Boat *p1[], Boat *p2[], Map map[],Info info)
         map[i].HUD.submarines = 0;
         map[i].HUD.destroyers = 0;
         map[i].info = info;
-        for (int j = 0; j < HEIGHT; ++j) {
-            for (int k = 0; k < WIDTH; ++k) {
+        for (int j = 0; j < HEIGHT; ++j) 
+            for (int k = 0; k < WIDTH; ++k) 
                 map[i].sea[j][k] = INACTIVE;
-            } 
-        }
     }
+
     for (int i = 0; i < info.boats; ++i) {
         Types type = pattern[i % 5];
         int size = pattern_size[type];
-        char *name = names[type];
-        while ((p1[i] = create_boat(type, size, name,  map[PLAYER1].sea)) == NULL)
-            continue;
-        update_HUD(&map[PLAYER1].HUD, type, +1);
-        ++map[PLAYER1].remaining_boats;
+        const char *name = names[type];
 
-        while ((p2[i] = create_boat(type, size, name, map[OPPONENT].sea)) == NULL)
-            continue;
-        update_HUD(&map[OPPONENT].HUD, type, +1);
-        ++map[OPPONENT].remaining_boats;
+        for (Player j = 0; j < MAX_PLAYERS; ++j) {
+            while (!create_boat(&boats[j][i], boats[j], map[j].sea, size, type, name))
+                ;
+            update_HUD(&map[j].HUD, type, +1);
+            ++map[j].remaining_boats;
+        }
     }
 
+}
+
+Validity check_valid(Camp sea[HEIGHT][WIDTH], Point attack)
+{
+    if (attack.x < 0 || attack.y < 0
+        || attack.x >= WIDTH || attack.y >= HEIGHT)
+        return OUTRANGE;
+    else if (sea[attack.y][attack.x] == INACTIVE 
+             || sea[attack.y][attack.x] == ACTIVE)
+        return VALID;
+    else
+        return REPEATED;
 }
 
 void update_HUD(Hud *HUD, Types type, int change)
@@ -101,33 +88,29 @@ void update_HUD(Hud *HUD, Types type, int change)
 }
 
 
-static Boat *create_boat(Types type, int size, char *name, Camp sea[HEIGHT][WIDTH])
+static bool create_boat(Boat *new, Boat *boats, Camp sea[HEIGHT][WIDTH], size_t size, Types type, const char *name)
 {
-    Boat *new = malloc(sizeof(*new));
-    if (new == NULL) 
-        exit(EXIT_FAILURE);
-    new->coordinates = malloc(size * sizeof(*new->coordinates));
-    if (new->coordinates == NULL) {
+    new->p= malloc(size * sizeof(*new->p));
+    if (new->p == NULL) {
         free(new);
         exit(EXIT_FAILURE);
     }
+
     enum {NORTH, SOUTH, EAST, WEST} direction = rand() % NUMBER_DIRECTIONS;
     int x = rand() % WIDTH;
     int y = rand() % HEIGHT;
+    
     for (int i = 0; i < size; ++i) {
         if (x >= WIDTH || y >= HEIGHT || x < 0 || y < 0) {
-            free(new->coordinates);
-            free(new);
-            return NULL;
+            free(new->p);
+            return false;
         }
         if (sea[y][x] == ACTIVE) {
-            free(new->coordinates);
-            free(new);
-            return NULL;
+            free(new->p);
+            return false;
         }
-        new->coordinates[i].p.x = x;
-        new->coordinates[i].p.y = y;
-        new->coordinates[i].active = true;
+        new->p[i].x = x;
+        new->p[i].y = y;
         switch (direction) {
         case NORTH:
             ++y;
@@ -148,9 +131,8 @@ static Boat *create_boat(Types type, int size, char *name, Camp sea[HEIGHT][WIDT
     new->name  = name; 
     new->type = type;
     for (int i = 0; i < size; ++i) 
-            sea[new->coordinates[i].p.y]
-               [new->coordinates[i].p.x] = ACTIVE;
+            sea[new->p[i].y]
+               [new->p[i].x] = ACTIVE;
     
-    return new;
+    return true;
 }
-
