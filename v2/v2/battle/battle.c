@@ -66,7 +66,7 @@ Validity check_valid(Camp sea[HEIGHT][WIDTH], Point attack)
         return REPEATED;
 }
 
-void update_HUD(Hud *HUD, Types type, int change)
+void update_hud(Hud *HUD, Types type, int change)
 {
     switch (type) {
     case DESTROYER:
