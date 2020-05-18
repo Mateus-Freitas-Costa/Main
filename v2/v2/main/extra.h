@@ -3,8 +3,6 @@
 
 #define NAME_LEN 20
 
-typedef enum {PLAYER_ONE, PLAYER_TWO, BOT} Winner;
-
 typedef struct {
     int  boats;
     int  mode;
