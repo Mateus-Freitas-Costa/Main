@@ -2,10 +2,12 @@
 
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../game/game.h"
+#include "../battle/battle.h"
 
-void display_winner(Winner winner, Info info);
+void display_winner(Instance winner, Info info);
 
 int main(void)
 {
@@ -33,6 +35,9 @@ int main(void)
     fgets_(input, 3, stdin);
     sscanf(input, "%d", &info.mode);
 
+    printf("Enter name for the first player: ");
+    fgets_(info.namep1, NAME_LEN, stdin);
+
     if (info.mode == 1) {
         printf("Enter a difficulty (0-6):\n");
         puts("0 - Very easy");
@@ -43,21 +48,25 @@ int main(void)
         puts("5 - Insane");
         puts("6 - Impossible");
 
-	fgets_(input, 3, stdin);
+	    fgets_(input, 3, stdin);
         sscanf(input, "%d", &info.difficulty);
         if (info.difficulty < 0 || info.difficulty > 6) {
             puts("invalid difficulty");
             return 2;
         }
-    } 
+        strcpy(info.namep2, "BOT");
+    } else {
+        printf("Enter name for the second player :");
+        fgets_(info.namep2, NAME_LEN, stdin);
+    }
     
-    Winner winner;
+    Instance winner;
 
     srand((unsigned) time(NULL));
     switch (info.mode) {
     case 1:
     case 2:
-        winner = play_game(info);
+        winner = play_game(info); // alterar aqui é claro
         break;
     default:
         puts("Invalid mode");
@@ -68,13 +77,13 @@ int main(void)
     return 0;
 }
 
-void display_winner(Winner winner, Info info)
+void display_winner(Instance winner, Info info)
 {
     int chance;
 
-    switch (winner) {
-    case PLAYER_ONE:
-        puts("Player one wins");
+    switch (winner.tag) {
+    case HUMAN:
+        printf("%s wins\n", winner.name);
         if (info.mode == 1) {
             switch (info.difficulty) {
             case 0:
@@ -102,12 +111,9 @@ void display_winner(Winner winner, Info info)
             }
         }
         break;
-    case PLAYER_TWO:
-        puts("Player two wins");
-        break;
-    case BOT:
+    case CPU:
         chance = rand() % 5;
-        if (info.difficulty != 6) {
+        if (info.difficulty < 6) {
             switch (chance) {
             case 0:
                 puts("BOT: You cannot beat me");
@@ -125,9 +131,8 @@ void display_winner(Winner winner, Info info)
                 puts("BOT: The bots of Rodguard will never lose");
                 break;
             } 
-        } else {
+        } else 
             puts("You thought I was joking? It's impossible defeat me");
-        }
         break;
     }
 }
