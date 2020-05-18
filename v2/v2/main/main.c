@@ -57,7 +57,7 @@ int main(void)
     switch (info.mode) {
     case 1:
     case 2:
-        winner = play_game(info); // alterar aqui é claro
+        winner = play_game(info);
         break;
     default:
         puts("Invalid mode");
