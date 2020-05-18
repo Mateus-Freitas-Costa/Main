@@ -6,8 +6,6 @@
 #include "../battle/battle.h"
 #include "../bot/bot.h"
 
-void clear_screen(void);
-char *fgets_(char *str, size_t size, FILE *stream);
 static void display_HUD(const Map *map, int current_height);
 static void display(const Map map[]);
 static bool destroyed_boat(Map *map, Boat *boat, Point attack);
@@ -19,7 +17,6 @@ static Point bot_response(Instance *instance, Map *map_game, Boat *boats);
 static bool round(Instance *instance, Map *map, size_t boats_count, Boat boats[MAX_PLAYERS][boats_count]);
 static void create_instances(Instance *instances, Info info);
 static void destroy_instances(Instance *instances, int boats_count, Boat boats[MAX_PLAYERS][boats_count]);
-Winner play_game(Info info);
 
 Winner play_game(Info info)
 {
