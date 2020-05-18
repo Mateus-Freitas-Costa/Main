@@ -71,9 +71,7 @@ static Point continue_attack(AI *bot, Map *map, Boat *boats)
 
     if (!bot->state.right_axis) {
         do {
-            Arrow new_arrow = rand() % NUMBER_DIRECTIONS;
-
-            bot->state.arrow = new_arrow;
+            bot->state.arrow = rand() % NUMBER_DIRECTIONS;
         } while (*get_blocked_direction(bot));
     }
 
