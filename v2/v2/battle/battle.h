@@ -41,7 +41,7 @@ typedef struct {
 } Map;
 
 typedef struct {
-    size_t          size;
+    unsigned int    size;
     Types           type;
     unsigned int    lifes;   
     const char     *name;
