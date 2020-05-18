@@ -5,7 +5,7 @@
 
 #define match_points(p1, p2) (p1.x == p2.x && p1.y == p2.y)
 
-static bool create_boat(Boat *new, Boat *boats, Camp sea[HEIGHT][WIDTH], size_t size, Types type, const char *name);
+static bool create_boat(Boat *new, Boat *boats, Camp sea[HEIGHT][WIDTH], unsigned int size, Types type, const char *name);
 
 Boat *get_boat(Boat *boats, Point attack, int boats_count)
 {
