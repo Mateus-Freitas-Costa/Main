@@ -1,28 +1,37 @@
 #include <stdio.h>
+
 #include <time.h>
 #include <stdlib.h>
 
 #include "../game/game.h"
 
-void display_winner(Winner winner);
+void display_winner(Winner winner, Info info);
 
 int main(void)
 {
-    #ifdef  __linux__
+#ifdef  __linux__
     system("clear");
-    #elif define WIN32
+#elif define WIN32
     system("cls");
-    #endif
+#endif
+
     Info info;
+    char input[4];
+
     puts("This is a battleship game");
+
     printf("Enter the number of boats you wanna to play with (3-8): ");
-    scanf("%d", &info.boats);
+    fgets_(input, 3, stdin);
+    sscanf(input, "%d", &info.boats);
+
     if (info.boats > 8 || info.boats < 3) {
         puts("Invalid number of boats");
         return 1;
     }
+
     printf("Enter the mode, 1 to play against the machine, 2 to play with another player: ");
-    scanf("%d", &info.mode);
+    fgets_(input, 3, stdin);
+    sscanf(input, "%d", &info.mode);
 
     if (info.mode == 1) {
         printf("Enter a difficulty (0-6):\n");
@@ -33,7 +42,9 @@ int main(void)
         puts("4 - Very hard");
         puts("5 - Insane");
         puts("6 - Impossible");
-        scanf("%d", &info.difficulty);
+
+	    fgets_(input, 3, stdin);
+        sscanf(input, "%d", &info.difficulty);
         if (info.difficulty < 0 || info.difficulty > 6) {
             puts("invalid difficulty");
             return 2;
@@ -41,34 +52,82 @@ int main(void)
     } 
     
     Winner winner;
+
     srand((unsigned) time(NULL));
     switch (info.mode) {
     case 1:
-        winner = bot_game(info);
-        break;
     case 2:
-        winner = two_players_game(info);
+        winner = play_game(info); // alterar aqui é claro
         break;
     default:
         puts("Invalid mode");
         return 3;
     }
     
-    display_winner(winner);
+    display_winner(winner, info);
     return 0;
 }
 
-void display_winner(Winner winner)
+void display_winner(Winner winner, Info info)
 {
+    int chance;
+
     switch (winner) {
     case PLAYER_ONE:
         puts("Player one wins");
+        if (info.mode == 1) {
+            switch (info.difficulty) {
+            case 0:
+                puts("You cannot defeat the masters, just the very easy one");
+                break;
+            case 1: 
+                puts("So you think you are good enough? Try again");
+                break;
+            case 2: 
+                puts("Oh noooooo...");
+                break;
+            case 3:
+                puts("I will have my revenge");
+                break;
+            case 4:
+                puts("I will never forgive you");
+                break;
+            case 5:
+                puts("This is not possible, how can I have loose for a simple man?"
+                      "the MASTER you obliterate you");
+                break;
+            case 6:
+                puts("Some bug has ocurred\a");
+                break;
+            }
+        }
         break;
     case PLAYER_TWO:
         puts("Player two wins");
         break;
     case BOT:
-        puts("BOT wins");
+        chance = rand() % 5;
+        if (info.difficulty != 6) {
+            switch (chance) {
+            case 0:
+                puts("BOT: You cannot beat me");
+                break;
+            case 1:
+                puts("BOT: I am the winner again");
+                break;
+            case 2:
+                puts("BOT: You are a great noob");
+                break;
+            case 3:
+                puts("BOT: I am the best player in the world");
+                break;
+            case 4:
+                puts("BOT: The bots of Rodguard will never lose");
+                break;
+            } 
+        } else {
+            puts("You thought I was joking? It's impossible defeat me");
+        }
         break;
     }
 }
