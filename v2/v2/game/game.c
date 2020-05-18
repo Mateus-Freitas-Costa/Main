@@ -38,7 +38,7 @@ Winner play_game(Info info)
             destroy_instances(instances, info.boats, boats);
             return instances[i].name;
         }
-        i = i == PLAYER1 ? OPPONENT : PLAYER1;
+        i = instances[i].enemy;
     }
 
 }
