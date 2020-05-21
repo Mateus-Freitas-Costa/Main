@@ -7,16 +7,17 @@
 #include "../battle/battle.h"
 #include "../bot/bot.h"
 
-static void display_HUD(const Map *map, int current_height);
+#define message(...) (display(map), printf(__VA_ARGS__))
+
+static void display_hud(const Map *map, int current_height);
 static void display(const Map *map);
 static bool destroyed_boat(Map *map, Boat *boat, Point attack);
-static Point input_attack_player(char *self_name);
-static Point attack_player(Instance *instance, Map *map, Boat *boats);
+static Point player_time(Instance *instance, Map *map, Boat *boats);
 static Point bot_response(Instance *instance, Map *map, Boat *boats);
 static void create_new_instance(Instance *new_instance, Tag tag, void *self, Player enemy,
                                 char *name, Point (*f_atx)(Instance *, Map *, Boat *));
 static bool round(Instance *instance, Map *map, int boats_count, Boat boats[MAX_PLAYERS][boats_count]);
-static void create_instances(Instance *instances, Info info);
+static void players_instances_create(Instance *instances, Info info);
 static void destroy_instances(Instance *instances, int boats_count, Boat boats[MAX_PLAYERS][boats_count]);
 
 Instance play_game(Info info)
@@ -26,7 +27,8 @@ Instance play_game(Info info)
     Map map[MAX_PLAYERS];
     Player i = PLAYER1;
 
-    create_instances(instances, info);
+    players_instances_create(instances, info);
+    initialize_map(map, info);
     create_map(info, map, boats);
     display(map);
 
@@ -38,7 +40,6 @@ Instance play_game(Info info)
         }
         i = instances[i].enemy;
     }
-
 }
 
 static void destroy_instances(Instance *instances, int boats_count, Boat boats[MAX_PLAYERS][boats_count])
@@ -51,16 +52,16 @@ static void destroy_instances(Instance *instances, int boats_count, Boat boats[M
     }
 }
 
-static void create_instances(Instance *instances, Info info)
+static void players_instances_create(Instance *instances, Info info)
 {
-    create_new_instance(&instances[PLAYER1], HUMAN, NULL, OPPONENT, info.namep1, attack_player);
+    create_new_instance(&instances[PLAYER1], HUMAN, NULL, OPPONENT, info.namep1, player_time);
 
     switch (info.mode) {
     case 1:
-        create_new_instance(&instances[OPPONENT], CPU, create_bot(info.difficulty), PLAYER1, info.namep2,bot_response);
+        create_new_instance(&instances[OPPONENT], CPU, create_bot(info.difficulty), PLAYER1, info.namep2, bot_response);
         break;
     case 2:
-        create_new_instance(&instances[OPPONENT], HUMAN, NULL, PLAYER1, info.namep2, attack_player);
+        create_new_instance(&instances[OPPONENT], HUMAN, NULL, PLAYER1, info.namep2, player_time);
         break;
     }
 }
@@ -68,14 +69,15 @@ static void create_instances(Instance *instances, Info info)
 static bool round(Instance *instance, Map *map, int boats_count, Boat boats[MAX_PLAYERS][boats_count])
 {
     Point attack = instance->attack_func(instance, map, boats[instance->enemy]);
-    char *msgs_attacks[MAX_PLAYERS][3] = {{"You attacked ", "You destroyed ", "You Missed"},
-                                          {"The Bot attacked your ", "The bot destroyed your ", "The bot Missed"}};
+    char *msgs_otp[MAX_PLAYERS][3] = {{"You attacked", "You destroyed", "You Missed"},
+                                      {"The Bot attacked your", "The Bot destroyed your", "The Bot missed"}};
 
-    char msg_attack[25];
+
+    char msg_otp[25];
     Boat *attacked = get_boat(boats[instance->enemy], attack, boats_count);
 
     if (attacked == NULL) {
-        sprintf(msg_attack, "%s", msgs_attacks[instance->tag][2]);
+        sprintf(msg_otp, "%s", msgs_otp[instance->tag][2]);
         map[instance->enemy].sea[attack.y][attack.x] = MISSED;
     } else {
         int index_msg;
@@ -84,11 +86,10 @@ static bool round(Instance *instance, Map *map, int boats_count, Boat boats[MAX_
             update_hud(&map[instance->enemy].HUD, attacked->type, -1);
         } else
             index_msg = 0;
-        sprintf(msg_attack, "%s%s", msgs_attacks[instance->tag][index_msg], attacked->name);
+        sprintf(msg_otp, "%s %s", msgs_otp[instance->tag][index_msg], attacked->name);
     }
 
-    display(map);
-    printf("%s\n", msg_attack);
+    message("%s\n", msg_otp);
 
     return map[instance->enemy].remaining_boats == 0;
 }
@@ -110,34 +111,25 @@ static void create_new_instance(Instance *new_instance, Tag tag, void *self, Pla
     new_instance->tag = tag;
 }
 
-static Point attack_player(Instance *instance, Map *map, Boat *boats)
+static Point player_time(Instance *instance, Map *map, Boat *boats)
 {
     char *msg_invalid[2] = {"Outside of range", "You cannot attack the same point again"};
     Point attack;
-    Validity validity;
+    char inpt_buf[30];
+    Validity err;
 
-    do {
-        attack = input_attack_player(instance->name);
-        validity = check_valid(map[instance->enemy].sea, attack);
-        if (validity != VALID) {
-            display(map);
-            printf("%s\n", msg_invalid[validity]);
-        }
-    } while (validity != VALID);
+    for (;;) {
+        printf("%s time, enter a coordinate: (x-y)\n", instance->name);
+        fgets_(inpt_buf, 29, stdin);
+        if (sscanf(inpt_buf, "%d -%d", &attack.x, &attack.y) != 2) 
+            message("Enter a valid input\n");
+        else if ((err = check_valid(map[instance->enemy].sea, attack)) != VALID) 
+            message("%s\n", msg_invalid[err]);
+        else
+            break;
+    }
     
     return attack;
-}
-
-static Point input_attack_player(char *self_name)
-{
-    char ipt_str[10];
-    Point input;
-
-    printf("%s time, enter a coordinate: ", self_name);
-    fgets_(ipt_str, 9, stdin);
-    sscanf(ipt_str, "%d -%d", &input.x, &input.y);
-
-    return input;
 }
 
 static bool destroyed_boat(Map *map, Boat *boat, Point attack)
@@ -200,12 +192,12 @@ static void display(const Map *map)
                 printf("   %s", map[0].info.namep2);
             }
         }
-        display_HUD(map, i);
+        display_hud(map, i);
         putchar('\n');
     } 
 }
 
-static void display_HUD(const Map *map, int current_height)
+static void display_hud(const Map *map, int current_height)
 {
     Player current_player;
     if (current_height < HEIGHT / MAX_PLAYERS)
