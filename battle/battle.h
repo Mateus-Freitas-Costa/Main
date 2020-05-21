@@ -60,5 +60,6 @@ void     update_hud              (Hud *HUD, Types type, int change);
 Boat      *get_boat(Boat *boats, Point attack, int boats_count);
 void     create_map(Info info, Map *map, Boat boats[MAX_PLAYERS][info.boats]);
 Validity check_valid(Camp sea[HEIGHT][WIDTH], Point attack);
+void initialize_map(Map *map, Info info);
 
 #endif /* BATTLE_H */
