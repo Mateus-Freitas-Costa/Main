@@ -10,7 +10,7 @@ typedef struct {
     int  mode;
     int  difficulty;
     char namep1[NAME_LEN + 1];
-    char namep2[NAME_LEN + 2];
+    char namep2[NAME_LEN + 1];
 } Info;
 
 
