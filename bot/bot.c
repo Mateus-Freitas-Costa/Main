@@ -136,14 +136,14 @@ static bool are_the_same(const AI *bot, const Boat *attacked)
 static bool *get_blocked_direction(AI *bot)
 {
     switch (bot->state.arrow) {
-        case UP:
-            return &bot->state.blocked.up;
-        case DOWN:
-            return &bot->state.blocked.down;
-        case RIGHT:
-            return &bot->state.blocked.right;
-        case LEFT:
-            return &bot->state.blocked.left;
+    case UP:
+        return &bot->state.blocked.up;
+    case DOWN:
+        return &bot->state.blocked.down;
+    case RIGHT:
+        return &bot->state.blocked.right;
+    case LEFT:
+        return &bot->state.blocked.left;
     }
 }
 
