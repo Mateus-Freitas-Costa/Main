@@ -1,1 +1,1 @@
-# Teste
+# A Simple Terminal Battleships game
